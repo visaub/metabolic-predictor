@@ -19,10 +19,19 @@ def cal2jul(cal):
 # W: body height, L: external load, V: velocity, S: slope %
 # Output: Metabolic Rate W = J/s
 def GG(W,L,V=0.0, S=0.0, eta=1.0, g=9.8):
+	# Givoni-Goldman model, 1971
 	return eta*(W+L)*(2.3+0.32*max(V*3.6-2.5,0)**1.65+S*(0.2+0.07*max(V*3.6-2.5,0)))*4184/3600
+
+
+
+def GG_running(W,L,V=0.0, S=0.0, eta=1.0, g=9.8):
+	mr = GG(W, L, V, S, eta=1.0, g=9.8)
+	return (mr+0.47*(900*4184/3600 - mr))*(1+S/100) 
+
 
 def PL(W,L=0.0, V=0.0, S=0.0, eta=1.0, g=9.8):
 	return 1.5*W+2.0*(W+L)*((L/W)**2)+eta*(W+L)*(1.5*V**2+0.35*V*S)
+
 
 def ACSM(W,L,V=0.0,S=0.0, eta=1.0, g=9.8):
 	return (0.1*V/60+1.8*V*S/60+3.5)*20.9*(1.0/60)

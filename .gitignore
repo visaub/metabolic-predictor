@@ -1,0 +1,14 @@
+# Data/Config folders #
+#######################
+__pycache__/
+**/__pycache__/
+migrations/
+**/migrations/
+
+# Log and DataBase #
+####################
+*.log
+*.sql
+
+# Terrain files #
+*.csv

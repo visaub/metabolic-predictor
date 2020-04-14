@@ -1,4 +1,4 @@
-#%matplotlib inline    #Only for jupyter notebook
+
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -49,27 +49,30 @@ plt.ylim(0,11)
 plt.grid()
 plt.legend(fontsize=10)
 
-plt.show()
-# # fig, ax = plt.subplots(figsize=(7, 7))
-# plt.subplot(133)
-
-# Gs=np.arange(-30,30,0.1)
-# Vs=np.linspace(0,10,5)
-# Ys=np.zeros((len(Vs),len(Gs)))
-# for iv,V in enumerate(Vs):
-# 	for ig,G in enumerate(Gs):
-# 		Ys[iv,ig]=(SANTEE(W,L,V,G,1.0,g=1.6))
-	
-# 	plt.plot(Gs, Ys[iv, :], label=r'V = '+str(V))
-
-# plt.title('SANTEE',fontsize=15)
-# plt.xlabel(r'Slope %',fontsize=15)
-
-
-# plt.ylabel(r'MR $[W]$', fontsize=15)
-# # plt.ylim(0,11) 
-# plt.grid()
-# plt.legend(fontsize=10)
 # plt.show()
 
-# plt.subplots_adjust(top=1.5, bottom=0, left=0.10, right=1.7, hspace=0.425,wspace=0.35)
+# fig, ax = plt.subplots(figsize=(7, 7))
+plt.subplot(133)
+
+Gs=np.arange(-30,30,0.1)
+Vs=np.linspace(0,10,5)
+Ys=np.zeros((len(Vs),len(Gs)))
+for iv,V in enumerate(Vs):
+	for ig,G in enumerate(Gs):
+		Ys[iv,ig]=(SANTEE(W,L,V,G,1.0,g=1.6))
+	
+	plt.plot(Gs, Ys[iv, :], label=r'V = '+str(V))
+
+plt.title('SANTEE',fontsize=15)
+plt.xlabel(r'Slope %',fontsize=15)
+
+
+plt.ylabel(r'MR $[W]$', fontsize=15)
+# plt.ylim(0,11) 
+plt.grid()
+plt.legend(fontsize=10)
+plt.show()
+
+plt.subplots_adjust(top=1.5, bottom=0, left=0.10, right=1.7, hspace=0.425,wspace=0.35)
+
+
