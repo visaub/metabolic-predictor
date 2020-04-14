@@ -17,3 +17,6 @@ migrations/
 # Compiler #
 ############
 *.pyc
+*.pyc
+__pycache__/explorer.cpython-37.pyc
+__pycache__/models.cpython-37.pyc
