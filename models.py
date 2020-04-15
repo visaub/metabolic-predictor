@@ -25,12 +25,23 @@ def GG(W,L,V=0.0, S=0.0, eta=1.0, g=9.8):
 
 
 def GG_running(W,L,V=0.0, S=0.0, eta=1.0, g=9.8):
-	mr = GG(W, L, V, S, eta=1.0, g=9.8)
+	mr = GG(W, L, V, S, eta, g)
 	return (mr+0.47*(900*4184/3600 - mr))*(1+S/100) 
 
 
 def PL(W,L=0.0, V=0.0, S=0.0, eta=1.0, g=9.8):
 	return 1.5*W+2.0*(W+L)*((L/W)**2)+eta*(W+L)*(1.5*V**2+0.35*V*S)
+
+def PL_santee(W,L=0.0, V=0.0, S=0.0, eta=1.0, g=9.8):
+	mr = PL(W, L, V, S, eta, g)
+	c = eta*( (S*(W+L)*V )/3.5 - (((W+L)*(S+6)**2)/W) +(25-V**2))
+	delta=0.2
+	if S>=delta:
+		return mr
+	elif S<-delta:
+		return mr-c
+	else:
+		return (mr*(S+delta)+(mr-c)*(delta-S))/(2*delta)   #smooth
 
 
 def ACSM(W,L,V=0.0,S=0.0, eta=1.0, g=9.8):
@@ -45,7 +56,7 @@ def SANTEE(W,L,V=0.0,S=0.0, eta=1.0, g=9.8):
 		W_slope=2.4*(W+L)*g*V*np.sin(alpha)*0.3**(abs(alpha)/7.65)
 	return W_level+W_slope
 
-MODELS={'GG':GG, 'PL':PL, 'ACSM':ACSM, 'SANTEE':SANTEE}
+MODELS={'GG':GG, 'PL':PL, 'ACSM':ACSM, 'SANTEE':SANTEE, 'GG_running':GG_running, 'PL_santee':PL_santee}
 
 
 def speed_astronaut(S=0.0):

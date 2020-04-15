@@ -1,5 +1,5 @@
 
-from models import write_traverse, add_energy, PL, GG
+from models import write_traverse, add_energy, PL, GG,  GG_running, PL_santee
 import os
 import numpy as np
 import pandas as pd

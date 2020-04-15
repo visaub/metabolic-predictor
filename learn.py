@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 
 from explorer import explorer
-from models import write_traverse, add_energy, PL, ACSM, GG
+from models import write_traverse, add_energy, PL, ACSM, GG,  GG_running, PL_santee
 
 from keras import layers
 from keras.models import load_model, Sequential
@@ -61,13 +61,12 @@ def find_nn(E, input_names, name_model=None):
 
 if __name__ == '__main__':
 
-	E1=explorer(input_model='GG', num_iters=100, problem_code='train_GG')
+	E1=explorer(input_model='PL_santee', num_iters=50, problem_code='train_PL')
 	E1.recombine_features(2)
 	inputs=E1[input_names]
 	rate=E1['Rate']
 
-
-	E2=explorer(input_model='GG', num_iters=100, problem_code='test_GG')
+	E2=explorer(input_model='PL_santee', num_iters=100, problem_code='test_PL')
 	E2.recombine_features(2)
 	inputs_test=E2[input_names]
 	rate_test=E2['Rate']
@@ -112,12 +111,13 @@ if __name__ == '__main__':
 	)
 
 
+
 	aux=input('Press Enter key to continue...')
 
 
 	### SAVING/LOADING MODEL ###
 
-	name_model='GG_small'
+	name_model='PL_santee'
 	model.save('trained_models/'+name_model+'.h5')
 	print('Deleting model...')
 	del model
@@ -136,7 +136,7 @@ if __name__ == '__main__':
 	plt.xlabel('epoch')
 	plt.legend(['train', 'test'], loc='upper left')
 
-
+	plt.show()
 
 
 	# Create input variables matrix
@@ -148,18 +148,25 @@ if __name__ == '__main__':
 	Velocity=np.linspace(2,2,L)
 	Slope=np.linspace(-20,20,L)
 
+	d_inputs = {'Weight':Weight, 'Load':Load, 'Velocity':Velocity, 'Slope':Slope}
 
-	inputs_matrix=np.zeros((L,4))
+	inputs_matrix=np.zeros((L,14))
 	inputs_matrix[:,0]=Weight
 	inputs_matrix[:,1]=Load
 	inputs_matrix[:,2]=Velocity
 	inputs_matrix[:,3]=Slope
+	for i in range(0,len(input_names)):
+		column = d_inputs[input_names[i].split('*')[0]]
+		for j in range(len(input_names[i].split('*'))-1):
+			column *= d_inputs[input_names[i].split('*')[j]]
+		inputs_matrix[:,i] = column
 
+	input_names=['Weight', 'Load', 'Velocity', 'Slope', 'Weight*Weight', 'Weight*Load', 'Load*Load', 'Weight*Velocity', 'Load*Velocity', 'Velocity*Velocity', 'Weight*Slope', 'Load*Slope', 'Velocity*Slope', 'Slope*Slope']
 
 	Predicted_Rate=model.predict(x=inputs_matrix)[:,0]
 
 	#PL(W,L=0.0, V=0.0, G=0.0, eta=1.0)
-	Rate=np.array(list(map(lambda e:GG(*e),inputs_matrix)))
+	Rate=np.array(list(map(lambda e: PL_santee(*e),inputs_matrix[:,0:4])))
 
 	np.concatenate((Rate,Predicted_Rate))
 	ylim=(min(np.concatenate((Rate,Predicted_Rate))),max(np.concatenate((Rate,Predicted_Rate))))
@@ -182,7 +189,7 @@ if __name__ == '__main__':
 	inputs_matrix[:,3]=Slope
 
 	Predicted_Rate=model.predict(x=inputs_matrix)[:,0]
-	Rate=np.array(list(map(lambda e:GG(*e),inputs_matrix)))
+	Rate=np.array(list(map(lambda e: PL_santee(*e),inputs_matrix[:,0:4])))
 
 	ylim=(min(np.concatenate((Rate,Predicted_Rate))),max(np.concatenate((Rate,Predicted_Rate))))
 

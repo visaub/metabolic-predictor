@@ -4,22 +4,13 @@ import sys
 
 # from models import GG, PL, ACSM, SANTEE
 
-list_graphs=['GG_grade plots', 'GG walking vs running', 'GG transition speed']
+list_graphs=['GG_grade plots', 'PL_grade plots', 'GG walking vs running', 'GG transition speed', 'PL_santee speed_grade plots']
 
 
 from models import GG as GG
 from models import GG_running as GG_running
 from models import PL as PL
-
-# def GG(W,L,V=0.0, S=0.0, eta=1.0, g=9.8):
-# 	# Givoni-Goldman model, 1971
-# 	return eta*(W+L)*(2.3+0.32*max(V*3.6-2.5,0)**1.65+S*(0.2+0.07*max(V*3.6-2.5,0)))*4184/3600
-
-# def GG_running(W,L,V=0.0, S=0.0, eta=1.0, g=9.8):
-# 	mr = GG(W, L, V, S, eta=1.0, g=9.8)
-# 	return (mr+0.47*(900*4184/3600 - mr))*(1+S/100) 
-
-
+from models import PL_santee as PL_santee
 
 
 def massive_plots(title):
@@ -29,7 +20,7 @@ def massive_plots(title):
 
 	if title=='GG_grade plots':
 		Gs=np.arange(-12,25,4)
-		Vs=np.linspace(2.5,9,100)
+		Vs=np.linspace(2.5,9,100)     #km/h
 		W,L=70,0        #We don't care yet
 		Ygg=np.zeros((len(Gs),len(Vs)))
 
@@ -37,7 +28,7 @@ def massive_plots(title):
 			for iv,V in enumerate(Vs):
 				Ygg[ig,iv] = (GG(W,L,V/3.6,G,1.0)/(W+L)) * 3600/4184
 			
-			plt.plot( Vs, Ygg[ig, :], label=r'G = %d'%G )
+			plt.plot( Vs, Ygg[ig, :], label='G = {}%'.format(G) )
 			
 		plt.title(title, fontsize=15)
 		plt.xlabel(r'V $[km/h]$',fontsize=15)
@@ -47,6 +38,53 @@ def massive_plots(title):
 		plt.grid()
 		plt.legend(fontsize=10)
 		plt.show()
+
+
+	if title=='PL_grade plots':
+		Gs=np.arange(24,-4.1, -4)
+		Vs=np.linspace(0, 20, 100)   #km/h
+		W,L=70,0        #We don't care yet
+		Ygg=np.zeros((len(Gs),len(Vs)))
+
+		for ig,G in enumerate(Gs):
+			for iv,V in enumerate(Vs):
+				Ygg[ig,iv] = (PL(W,L,V/3.6,G,1.0)/(W+L)) * 3600/4184
+			
+			plt.plot( Vs, Ygg[ig, :], label='G = {}%'.format(G) )
+			
+		plt.title(title, fontsize=15)
+		plt.xlabel(r'V $[km/h]$',fontsize=15)
+		plt.ylabel(r'MR $kcal/(hr*kg)$', fontsize=15)
+		plt.ylim(0,12) 
+		plt.xlim(2,12) 
+		plt.grid()
+		plt.legend(fontsize=10)  #change pos soon
+		plt.show()
+	
+
+	if title=='PL_santee speed_grade plots':
+
+		Vs=np.arange(0,10,1)   #km/h
+		Gs=np.linspace(-20, 20, 5000)
+		W,L=70,0        #We don't care yet
+		Ygg=np.zeros((len(Vs),len(Gs)))
+
+		for iv,V in enumerate(Vs):
+			for ig,G in enumerate(Gs):
+				Ygg[iv,ig] = (PL_santee(W,L, V/3.6, G, 1.0)/(W+L)) * 3600/4184
+			
+			plt.plot( Gs, Ygg[iv, :], label='V = {}km/h'.format(V) )
+		
+		plt.title(title+' W={}, L={}'.format(W,L) , fontsize=15)
+		plt.xlabel(r'G $[%]$',fontsize=15)
+		plt.ylabel(r'MR $kcal/(hr*kg)$', fontsize=15)
+		#plt.ylim(0,14) 
+		#plt.xlim(0,12) 
+		plt.grid()
+		plt.legend(fontsize=10)
+		plt.show()
+
+
 
 	if title=='GG walking vs running':
 
@@ -112,8 +150,8 @@ def massive_plots(title):
 		plt.subplot(122)
 
 		W=50
-		Ls=np.linspace(0,100,200)  #Loads
-		Y=np.zeros(len(Gs))
+		Ls=np.linspace(50,100,200)  #Loads
+		Y=np.zeros(len(Ls))
 		G=0
 
 		for il, L in enumerate(Ls):
@@ -121,7 +159,7 @@ def massive_plots(title):
 			v=binary_search(funct, 0, 30, 20)
 			Y[il]=v
 
-		plt.plot(Ls, Y)
+		plt.plot(Ls, Y, 'r')
 
 		plt.title(title, fontsize=15)
 		plt.xlabel(r'Weight+Load [kg]', fontsize=15)
