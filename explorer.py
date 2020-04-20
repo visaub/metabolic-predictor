@@ -98,10 +98,13 @@ class explorer():
 		message+='List_Ys: '+str(self.list_Ys)+'\n'
 		return message
 
-	def read_temp(self):
+	def read_temp(self, ALL=True, traverse_name=None):
 		prefix='energy/temp/'+self.problem_code+'/'
 		list_dfs=[]
 		dataFiles = [ f for f in os.listdir(prefix) if f.endswith('.csv') ]
+		if ALL==False:
+			if traverse_name+'.csv' in dataFiles:
+				dataFiles = [traverse_name+'.csv']
 		for f in dataFiles:
 			df=pd.read_csv(prefix+f)
 			TIME=np.array(df['TIME'])

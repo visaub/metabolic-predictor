@@ -133,7 +133,7 @@ def add_energy(filename_input,filename_output,input_model=0):
 	if input_model in MODELS:  # if input_model is a string identifier
 		model=MODELS[input_model]
 	if input_model==0:
-		model=PL
+		model=PL   # By defect we choose PL
 	df=pd.read_csv('traverse/'+filename_input+'.csv')
 	TIME=np.array(df['TIME'])
 	Weight=np.array(df['Weight'])
@@ -154,22 +154,3 @@ def add_energy(filename_input,filename_output,input_model=0):
 
 	df.to_csv('energy/'+ filename_output + '.csv', index=False, columns=['TIME','Weight','Load','Velocity','Slope','Eta','Gravity','Rate','Fatigue'])
 
-	# handle=open('energy/'+ filename_output + '.csv', 'w')
-	# handle.write(df.to_csv(index=False))
-	# handle.close()
-
-""" Writing other functions
-def loadAllData():
-    d = {}
-    dataFiles = [ x for x in os.listdir('data') if x.endswith('.csv') ]
-    for f in dataFiles:
-        print ('reading file: %s' % f)
-        symbol = f.split('.')[0]
-        df = pd.read_csv( 'data/' + f )
-        df['Date'] = [ datetime.strptime( x, '%m/%d/%y' ) for x in df['Date'] ]
-        df.index = df['Date']
-        print (df.head())
-        d[ symbol ] = df
-        print ('read %s' % f)
-    return d
- """

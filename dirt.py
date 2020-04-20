@@ -86,12 +86,3 @@
 #           batch_size=128)
 # score = model.evaluate(x_test, y_test, batch_size=128)
 
-import sys
-f = open('output2.txt','w')
-
-for i in range(32,128):
-	f.write(''.join((' ','@',chr(i))))
-	for j in range(32,128):
-		f.write(''.join((' ','@',chr(i),chr(j))))
-		# for k in range(32,128):
-		# 	f.write(''.join((' ','@',chr(i),chr(j),chr(k))))
