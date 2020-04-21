@@ -61,12 +61,12 @@ def find_nn(E, input_names, name_model=None):
 
 if __name__ == '__main__':
 
-	E1=explorer(input_model='PL_santee', num_iters=50, problem_code='train_PL')
+	E1=explorer(input_model='PL_santee', num_iters=50, ID='train_PL')
 	E1.recombine_features(2)
 	inputs=E1[input_names]
 	rate=E1['Rate']
 
-	E2=explorer(input_model='PL_santee', num_iters=100, problem_code='test_PL')
+	E2=explorer(input_model='PL_santee', num_iters=100, ID='test_PL')
 	E2.recombine_features(2)
 	inputs_test=E2[input_names]
 	rate_test=E2['Rate']

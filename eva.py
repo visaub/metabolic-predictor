@@ -10,4 +10,4 @@ import matplotlib.pyplot as plt
 # GG(W,L,V=0.0,S=0.0, eta=1.0):
 def mc(W,L,V=0.0,S=0.0,)
 
-E=explorer(input_model='PL', num_iters=100, problem_code=False)
+E=explorer(input_model='PL', num_iters=100, ID=False)

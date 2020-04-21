@@ -68,7 +68,7 @@ def get_route(ID=None, traverse=None):
 			return "Error. Traverse does not exist"
 		return "Error. Traverse has no energy"
 
-	astronaut = explorer(problem_code=ID)
+	astronaut = explorer(ID=ID)
 	df=astronaut.read_temp(ALL=False, traverse_name=traverse)[0]
 	TIME=df['TIME']
 	weight=df['Weight']
@@ -158,7 +158,9 @@ def add_route():
 
 	return ("Traverse "+filename+" added to subject: "+ID,200)
 
- 	
+ 
+
+
  	# Names until now: problem_code, id, ID, user,			please, change terminology
 
 

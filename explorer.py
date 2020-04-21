@@ -7,13 +7,13 @@ import pandas as pd
 # At the moment I'll be using Pandolf Load model with L=0 and eta=1.0
 # PL(W, L=0.0, V=0.0, S=0.0, eta=1.0) (becomes)-> 1.5*W + (W+L)*(1.5*V^2+0.35*V*S)
 
-def generate_traverses(num_iters=100, input_model='PL', plot_it=False, problem_code=False, env=None):
+def generate_traverses(num_iters=100, input_model='PL', plot_it=False, ID=False, env=None):
 	#os.mkdir('traverse/test')
 	prefix=''
-	if not problem_code: #if there is no problem code, a new one is created
-		problem_code=str(len(os.listdir('traverse/temp')))  
-	problem_code=str(problem_code)
-	prefix='temp/'+problem_code+'/'
+	if not ID: #if there is no subject ID, a new one is created
+		ID=str(len(os.listdir('traverse/temp')))  
+	ID=str(ID)
+	prefix='temp/'+ID+'/'
 	os.mkdir('traverse/'+prefix)
 	os.mkdir('energy/'+prefix)
 	
@@ -52,7 +52,7 @@ def generate_traverses(num_iters=100, input_model='PL', plot_it=False, problem_c
 			plt.show()
 		write_traverse(l_points, filename = prefix+str(i), velocity=velocity, weight=weight, load=load, precision=precision, eta=eta, gravity=gravity)
 		add_energy(filename_input = prefix+str(i), filename_output=prefix+str(i), input_model=input_model)	
-	return problem_code
+	return ID
 
 
 class environment():
@@ -65,17 +65,17 @@ class environment():
 
 
 class explorer():
-	def __init__(self,input_model='PL',num_iters=10, problem_code=False, gravity=9.8, weight=None, load=None, eta=1.0):
+	def __init__(self,input_model='PL',num_iters=10, ID=False, gravity=9.8, weight=None, load=None, eta=1.0):
 		env=environment(gravity,eta,weight,load)
-		if problem_code:
-			self.problem_code = problem_code
+		if ID:
+			self.ID = ID
 			try:
-				self.problem_code = generate_traverses(num_iters, problem_code=problem_code, input_model=input_model, env=env)
+				self.ID = generate_traverses(num_iters, ID=ID, input_model=input_model, env=env)  #correct this inmidiatly
 			except FileExistsError:
 				pass
 
-		if not problem_code:
-			self.problem_code = generate_traverses(num_iters, input_model=input_model, env=env)
+		if not ID:
+			self.ID = generate_traverses(num_iters, input_model=input_model, env=env)
 
 		self.list_dfs=self.read_temp()
 		self.list_Xs=['TIME','Weight','Load','Velocity','Slope']
@@ -92,14 +92,14 @@ class explorer():
 		return np.array(self.df[column])
 
 	def __str__(self):
-		message+='Problem Code: '+self.problem_code+'\n'
+		message+='Subject ID: '+self.ID+'\n'
 		message+='Number of traverses: '+str(len(self.list_dfs))+'\n'
 		message+='List_Xs: '+str(self.list_Xs)+'\n'
 		message+='List_Ys: '+str(self.list_Ys)+'\n'
 		return message
 
 	def read_temp(self, ALL=True, traverse_name=None):
-		prefix='energy/temp/'+self.problem_code+'/'
+		prefix='energy/temp/'+self.ID+'/'
 		list_dfs=[]
 		dataFiles = [ f for f in os.listdir(prefix) if f.endswith('.csv') ]
 		if ALL==False:
