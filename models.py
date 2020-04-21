@@ -87,12 +87,12 @@ def write_traverse(l_points, filename='', velocity=1.25, weight=80, load=0, prec
 	# 1.25 m/s == 4.5 km/h. velocity could be a vector.  precision: 60 seconds of unit of time
 	xp = np.array(l_points[0])
 	yp = np.array(l_points[1])
-	if type(velocity)==type(1.0) or type(velocity)==type(1): #Velocity either a float or integer
+	if type(velocity)==type(1.0) or type(velocity)==type(1): #Velocity either a constant float or integer
 		meters_per_unit_of_time = precision*velocity
 		x = np.array([j*meters_per_unit_of_time for j in range(int(xp[-1]/meters_per_unit_of_time)+1)])
 	else:
 		x = np.cumsum(precision*velocity)
-	Time=np.array([j*precision for j in range(len(x))])	
+	TIME=np.array([j*precision for j in range(len(x))])	
 	# x: meters traveled on each timestamp
 	y = np.interp(x, xp, yp, left=yp[0], right=yp[-1])
 	aux = 100*(y[1:]-y[:-1])/(x[1:]-x[:-1]) # derivative # %percentage
@@ -102,7 +102,7 @@ def write_traverse(l_points, filename='', velocity=1.25, weight=80, load=0, prec
 	for i in range(1,len(Slope)-1):
 		Slope[i]=0.5*(aux[i-1]+aux[i])
 
-	df = pd.DataFrame({	'TIME': Time,
+	df = pd.DataFrame({	'TIME': TIME,
 						'X':x,
 						'Y':y,
 						'Weight': weight,
@@ -113,7 +113,7 @@ def write_traverse(l_points, filename='', velocity=1.25, weight=80, load=0, prec
                     	'Gravity': gravity})
 	
 	if filename=='':
-		filename=str(int(time.time()))
+		filename=str(float(time.time()))
 
 	df.to_csv('traverse/'+ filename + '.csv', index=False, columns=['TIME','X','Y','Weight','Load','Velocity','Slope','Eta','Gravity'])
 	
