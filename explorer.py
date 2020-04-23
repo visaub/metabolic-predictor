@@ -69,10 +69,13 @@ class explorer():
 		env=environment(gravity,eta,weight,load)
 		if ID:
 			self.ID = ID
-			try:
-				self.ID = generate_traverses(num_iters, ID=ID, input_model=input_model, env=env)  #correct this inmidiatly
-			except FileExistsError:
-				pass
+			list_users_traverse = os.listdir('traverse/temp')
+			if ID not in list_users_traverse:
+				try:
+					self.ID = generate_traverses(num_iters, ID=ID, input_model=input_model, env=env)  #correct this inmidiatly
+					print("Created new subject: ID = "+ID)
+				except FileExistsError:
+					pass
 
 		if not ID:
 			self.ID = generate_traverses(num_iters, input_model=input_model, env=env)
@@ -92,7 +95,7 @@ class explorer():
 		return np.array(self.df[column])
 
 	def __str__(self):
-		message+='Subject ID: '+self.ID+'\n'
+		message='Subject ID: '+self.ID+'\n'
 		message+='Number of traverses: '+str(len(self.list_dfs))+'\n'
 		message+='List_Xs: '+str(self.list_Xs)+'\n'
 		message+='List_Ys: '+str(self.list_Ys)+'\n'
@@ -115,6 +118,7 @@ class explorer():
 			Eta=np.array(df['Eta'])
 			Rate=np.array(df['Rate'])
 			Fatigue=np.array(df['Fatigue'])
+
 			list_dfs.append(df)
 		return list_dfs
 
@@ -160,12 +164,13 @@ class explorer():
 					list_Xs.append(new_column_name)
 					N+=1
 			self.recombined=n
-			print(f'Recombined to n = %d'%self.recombined)
+			print(f'Recombined features to n = %d'%self.recombined)
 		else: 
-			print(f'Already recombined to n = %d'%self.recombined)
+			print(f'Already recombined features to n = %d'%self.recombined)
 		if '1' not in list_Xs:
 			X=np.insert(X, 0, 1, axis=1)
 			list_Xs=['1']+list_Xs
+			self.df['1']=1
 		self.X=X
 		self.list_Xs=list_Xs			
 				

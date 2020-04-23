@@ -17,19 +17,20 @@ input_names=['Weight', 'Load', 'Velocity', 'Slope', 'Weight*Weight', 'Weight*Loa
 
 
 
-def find_nn(E, input_names, name_model=None):
+def find_nn(E, input_names, epochs=20):
 
 	model = Sequential()
 
 	# Input - Layer
-	model.add(layers.Dense(100, activation = "sigmoid", input_shape=(len(input_names), )))
+	model.add(layers.Dense(100, activation = "relu", input_shape=(len(input_names), )))
 	# Hidden - Layers
 	# model.add(layers.Dropout(0.01, noise_shape=None, seed=None))
+	# model.add(layers.Dense(1000, activation = "sigmoid"))
+	# model.add(layers.Dropout(0.01, noise_shape=None, seed=None))   #
 	model.add(layers.Dense(100, activation = "sigmoid"))
-	# model.add(layers.Dropout(0.01, noise_shape=None, seed=None))
+	model.add(layers.Dropout(0.1, noise_shape=None, seed=None))  #
 	model.add(layers.Dense(100, activation = "sigmoid"))
-	# model.add(layers.Dropout(0.01, noise_shape=None, seed=None))
-	model.add(layers.Dense(100, activation = "sigmoid"))
+	model.add(layers.Dense(100, activation = "relu"))
 	# model.add(layers.Dropout(0.01, noise_shape=None, seed=None))
 	# model.add(layers.Dense(200, activation = "sigmoid"))
 	# Output- Layer
@@ -37,24 +38,25 @@ def find_nn(E, input_names, name_model=None):
 	model.summary()
 	# compiling the model
 	model.compile(
-		optimizer = 'adam',
+		# optimizer = 'adam',
+		optimizer = 'sgd',
 		loss = "mean_squared_error",
 		metrics = ["mean_squared_error"]
 	)
 
 	inputs=E[input_names]
-	rate=E[['Rate','Fatigue']]
+	rate=E[['Rate']]#,'Fatigue']]
 
 	results = model.fit(
 		inputs, rate,
-		epochs= 20,
+		epochs= epochs,
 		# batch_size = 32,
 		validation_data = (inputs, rate),#(inputs_test, rate_test),
 		verbose=1
 	)
-	if name_model:
-		model.save('trained_models/'+name_model+'.h5')
-	return results
+
+	model.save('trained_models/' + E.ID + '.h5')
+	return model, results
 
 
 
@@ -97,7 +99,8 @@ if __name__ == '__main__':
 	# compiling the model
 
 	model.compile(
-		optimizer = 'adam',
+		#optimizer = 'adam',
+		optimizer ='sgd',
 		loss = "mean_squared_error",
 		metrics = ["mean_squared_error"]
 	)

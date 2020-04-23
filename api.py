@@ -5,7 +5,11 @@ import pandas as pd
 import numpy as np
 import requests as r
 
+from keras import layers       # We have to use Theano instead of Tensorflow
+from keras.models import load_model, Sequential
+
 from explorer import explorer
+from learn import find_nn
 
 app = flask.Flask(__name__)
 app.config["DEBUG"] = True
@@ -23,9 +27,13 @@ def docs():
 	'/api/subjects?id=id&type=list'
 	<br>
 	'/api/route/ID/traverse'
+	<br>
+	'/api/route/', methods=['POST']
+	<br>
+	'/api/predict/', methods=['POST']
 	"""
 
-@app.route('/api/subjects/', methods=['GET'])
+@app.route('/api/subjects', methods=['GET'])
 def subjects(kind=''): 
 	if 'type' in request.args and request.args['type']=='list':
 		list_users_traverse = os.listdir('traverse/temp')
@@ -54,14 +62,15 @@ def subjects(kind=''):
 
 
 @app.route('/api/route/<ID>/<traverse>', methods=['GET'])
-@app.route('/api/route/<ID>/', methods=['GET'])
-# @app.route('/api/route/<ID>/<Route>', methods=['GET'])
+@app.route('/api/route/<ID>', methods=['GET'])
 def get_route(ID=None, traverse=None): 
 	# if 'id' in request.args:
 	# 	ID = request.args['id']
 	if not ID or not traverse:
 		return "Error. Please, specify ID and traverse on the API, <b>/api/route/ID/traverse</b>"
 	prefix='energy/temp/'
+	if ID not in os.listdir('traverse/temp/'):
+		return "Error. Subject with ID: <b>"+ID+"</b> is not registered"
 	if traverse+'.csv' not in os.listdir('energy/temp/'+ID):
 		prefix='traverse/temp/'
 		if traverse+'.csv' not in os.listdir('traverse/temp/'+ID):
@@ -97,7 +106,7 @@ def get_route(ID=None, traverse=None):
 
 
 
-@app.route('/api/route/', methods=['POST'])
+@app.route('/api/route', methods=['POST'])
 # Add traverse to the database
 def add_route():
 	if request.method == 'POST':
@@ -113,6 +122,7 @@ def add_route():
 		if ID not in list_users_traverse:
 			os.mkdir('traverse/'+prefix)
 			os.mkdir('energy/'+prefix)
+			print("Created new subject: ID = "+ID)
 
 		if "Traverse" in json:
 			filename = json["Traverse"]
@@ -127,13 +137,13 @@ def add_route():
 		weight,load,velocity,slope,eta,gravity=[],[],[],[],[],[]
 		x,y=[],[]
 
-		for i in TIME:
+		for t in TIME:
 			x.append(0)    # Points should be deprecated
 			y.append(0)
-			weight.append(data[i]['Weight'])
-			load.append(data[i]['Load'])
-			velocity.append(data[i]['Velocity'])
-			slope.append(data[i]['Slope'])
+			weight.append(data[t]['Weight'])
+			load.append(data[t]['Load'])
+			velocity.append(data[t]['Velocity'])
+			slope.append(data[t]['Slope'])
 			eta.append(0.7)
 			gravity.append(9.6)
 
@@ -156,12 +166,69 @@ def add_route():
 		# traverse =json["Traverse"]
 		# data = json["data"]
 
-	return ("Traverse "+filename+" added to subject: "+ID,200)
+		# write to energy
 
- 
+	return ("OK. Traverse "+filename+" added to subject: "+ID,200)
 
 
- 	# Names until now: problem_code, id, ID, user,			please, change terminology
+@app.route('/api/predict', methods=['POST'])
+#Predict Rate at an instance
+def predict():
+
+	json = request.json
+	if "ID" not in json or "data" not in json:
+		return "Error. Submission incomplete"
+	ID = json["ID"]
+	data=json["data"]
+	if ID not in os.listdir('traverse/temp/'):
+		return "Error. Subject with ID: <b>"+ID+"</b> is not registered"
+	
+	TIME=list(map(int,data.keys()))
+	TIME.sort()
+	TIME=list(map(str,TIME))
+	weight,load,velocity,slope,eta,gravity=[],[],[],[],[],[]
+
+	for t in TIME:
+		weight.append(data[t]['Weight'])
+		load.append(data[t]['Load'])
+		velocity.append(data[t]['Velocity'])
+		slope.append(data[t]['Slope'])
+		# eta.append(data[t]['Eta'])
+
+	E=explorer(ID = ID)
+	input_names = ['1', 'Weight', 'Load', 'Velocity', 'Slope']
+	
+	if E.ID+'.h5' not in os.listdir('trained_models/'):
+		model, results = find_nn(E, input_names, epochs=10)
+	else:
+		model = load_model('trained_models/'+E.ID+'.h5')
+
+	x = E[input_names]
+	y = model.predict(x)
+
+	dict_return = json
+	dict_return['Rate Predicted']=[]
+	for i in range(len(TIME)):
+		dict_return['data'][TIME[i]]['Rate Predicted'] = float(y[i])
+		dict_return['Rate Predicted'].append(float(y[i]))
+	return jsonify(dict_return)
+
+
+	# df = pd.DataFrame({	'TIME': TIME,
+	# 	'X':x,
+	# 	'Y':y,
+	# 	'Weight': weight,
+	# 	'Load': load,
+	# 	'Velocity': velocity,
+	# 	'Slope': slope,
+	# 	'Eta': eta,
+	# 	'Gravity': gravity})
+
+@app.route('/test')
+def testtt():
+	model = load_model('trained_models/GG.h5')	
+	return 'GG'
+
 
 
 if __name__ == '__main__':

@@ -96,7 +96,7 @@ def write_traverse(l_points, filename='', velocity=1.25, weight=80, load=0, prec
 	# x: meters traveled on each timestamp
 	y = np.interp(x, xp, yp, left=yp[0], right=yp[-1])
 	aux = 100*(y[1:]-y[:-1])/(x[1:]-x[:-1]) # derivative # %percentage
-	Slope=np.zeros(len(Time))
+	Slope=np.zeros(len(TIME))
 	Slope[0]=aux[0]
 	Slope[-1]=aux[-1]
 	for i in range(1,len(Slope)-1):
