@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Metabolic predictor api</title>
+<style>
+table, th, td {
+  border: 1px solid black;
+  border-collapse: collapse;
+}
+</style>
+</head>
+<body>
+
+<h1>Hello, the api is running</h1><p>Metabolic & oxygen consumption predictor API.</p>
+
+    <p>Documentation will soon be available</p>
+    <p>ENDPOINTS:</p>
+
+<table>
+  <tr>
+    <th>Endpoints</th>
+    <th>Purpose</th>
+    <th>Inputs/Arguments</th>
+    <th>HTTP Method</th>
+    <th>Example</th>
+  </tr>
+  <tr>
+    <td><a href='/api/subjects'>/api/subjects</a></td>
+    <td>Subjects and traverses availables</td>
+    <td>id, type</td>
+    <td>GET</td>
+    <td><a href='/api/subjects?id=subject_test_3'>/api/subjects?id=subject_test_3</a></td>
+  </tr>
+  <tr>
+    <td><a href='/api/route/ID/traverse'>/api/route/ID/traverse</a></td>
+    <td>Get a traverse</td>
+    <td>id, traverse</td>
+    <td>GET</td>
+    <td><a href='/api/route/subject_test_3/5'>/api/route/subject_test_3/5</a></td>
+  </tr>
+  <tr>
+    <td><a href='/api/route'>/api/route</a></td>
+    <td>Upload new traverse. Creates new subject if necessary</td>
+    <td>json</td>
+    <td>POST</td>
+    <td></td>
+  </tr>
+  <tr>
+    <td><a href='/api/predict'>/api/predict</a></td>
+    <td>Predict MR using </td>
+    <td>json</td>
+    <td>POST</td>
+    <td></td>
+  </tr>
+</table>
+
+
+<br>
+<!-- <p>Author: Victor Sainz Ubide.</p>  -->
+<p>Code: <a href='https://github.com/visaub/metabolic-predictor'>https://github.com/visaub/metabolic-predictor</a></p>
+
+</body>

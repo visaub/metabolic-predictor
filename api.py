@@ -1,5 +1,5 @@
 import flask
-from flask import request, jsonify
+from flask import request, jsonify, render_template
 import os
 import pandas as pd
 import numpy as np
@@ -17,9 +17,10 @@ app.config["DEBUG"] = True
 
 @app.route('/', methods=['GET'])
 def home():
-    return """<h1>Hello, the api is running</h1><p> Metabolic predictor api</p>
-    <p>Author: Victor Sainz Ubide. Code: <a href='https://github.com/visaub/metabolic-predictor'>https://github.com/visaub/metabolic-predictor</a></p>
-    """
+
+	return render_template('home.html')
+
+
 
 @app.route('/api/endpoints')
 def docs():
@@ -107,6 +108,7 @@ def get_route(ID=None, traverse=None):
 
 
 @app.route('/api/route', methods=['POST'])
+@app.route('/api/route/', methods=['POST'])
 # Add traverse to the database
 def add_route():
 	if request.method == 'POST':
@@ -171,6 +173,7 @@ def add_route():
 	return ("OK. Traverse "+filename+" added to subject: "+ID,200)
 
 
+@app.route('/api/predict/', methods=['POST'])
 @app.route('/api/predict', methods=['POST'])
 #Predict Rate at an instance
 def predict():
