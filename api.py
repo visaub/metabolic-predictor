@@ -196,7 +196,7 @@ def predict():
 		# eta.append(data[t]['Eta'])
 
 	E=explorer(ID = ID)
-	input_names = ['1', 'Weight', 'Load', 'Velocity', 'Slope']
+	input_names = ['Weight', 'Load', 'Velocity', 'Slope']
 	
 	if E.ID+'.h5' not in os.listdir('trained_models/'):
 		model, results = find_nn(E, input_names, epochs=10)
@@ -205,7 +205,7 @@ def predict():
 
 	x = E[input_names]
 	y = model.predict(x)
-
+	# conda install m2w64-toolchain
 	dict_return = json
 	dict_return['Rate Predicted']=[]
 	for i in range(len(TIME)):
