@@ -48,7 +48,7 @@ def ACSM(W,L,V=0.0,S=0.0, eta=1.0, g=9.8):
 	return (0.1*V/60+1.8*V*S/60+3.5)*20.9*(1.0/60)
 
 def SANTEE(W,L,V=0.0,S=0.0, eta=1.0, g=9.8):
-	alpha=np.arctan(S/100)
+	alpha=np.arctan(S/100)  # angle
 	W_level=(3.28*(W+L)+71.1)*(0.661*V*np.cos(alpha)+0.115)
 	if alpha>0:
 		W_slope=3.5*(W+L)*g*V*np.sin(alpha)
@@ -57,6 +57,11 @@ def SANTEE(W,L,V=0.0,S=0.0, eta=1.0, g=9.8):
 	return W_level+W_slope
 
 MODELS={'GG':GG, 'PL':PL, 'ACSM':ACSM, 'SANTEE':SANTEE, 'GG_running':GG_running, 'PL_santee':PL_santee}
+
+
+def metabolic_rate_to_O2(mr):
+	O2 = mr*5/0.0143
+	return O2
 
 
 def speed_astronaut(S=0.0):

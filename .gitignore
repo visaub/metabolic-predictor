@@ -20,3 +20,8 @@ migrations/
 *.pyc
 __pycache__/explorer.cpython-37.pyc
 __pycache__/models.cpython-37.pyc
+
+
+#
+upload.sh
+pa_reload.py

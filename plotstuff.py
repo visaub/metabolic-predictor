@@ -4,19 +4,33 @@ import sys
 
 # from models import GG, PL, ACSM, SANTEE
 
-list_graphs=['GG_grade plots', 'PL_grade plots', 'GG walking vs running', 'GG transition speed', 'PL_santee speed_grade plots']
+list_graphs=['GG_grade plots', 'PL_grade plots', 'GG walking vs running', 'GG transition speed', 'PL_santee speed_grade plots','Speed Astronaut (Marquez, 2008)', 'SANTEE (2001)', 'Cost of Transport, JMarquez+Santee']
 
 
 from models import GG as GG
 from models import GG_running as GG_running
 from models import PL as PL
 from models import PL_santee as PL_santee
+from models import speed_astronaut as speed_astronaut
+from models import SANTEE
 
-
-def massive_plots(title):
+def choose_and_plot(title):
 
 	# plt.subplots(figsize=(14, 7))
 	# plt.subplot(131)
+
+	if title=='Speed Astronaut (Marquez, 2008)':
+		Ss=np.linspace(-25,25,200)     #Slopes
+		Vs=np.zeros(len(Ss))
+		for i, S in enumerate(Ss):
+			Vs[i] = speed_astronaut(S)
+
+		plt.plot(Ss,Vs)
+		plt.title(title, fontsize=15)
+		plt.xlabel('Slope [%]')
+		plt.ylabel('Speed [m/s]')
+		plt.grid()
+		plt.show()
 
 	if title=='GG_grade plots':
 		Gs=np.arange(-12,25,4)
@@ -170,6 +184,37 @@ def massive_plots(title):
 		plt.show()
 
 
+	if title=='SANTEE (2001)':
+		Ss=np.arange(-30,30,0.1)
+		Vs=np.linspace(0,5,6)
+		Ys=np.zeros((len(Vs),len(Ss)))
+		for iv,V in enumerate(Vs):
+			for i,S in enumerate(Ss):
+	   			Ys[iv,i]=SANTEE(80,0,V,S,1.0,g=1.6)
+			plt.plot(Ss, Ys[iv, :], label=r'V = '+str(V)+' m/s')
+		plt.title(title, fontsize=15)
+		plt.xlabel(r'Speed [m/s]', fontsize=15)	
+		plt.ylabel(r'Metabolic Rate [W]', fontsize=15)
+		plt.grid()
+		plt.legend(fontsize=10)
+		plt.show()
+
+
+	if title=='Cost of Transport, JMarquez+Santee':
+		Ss=np.arange(-30,30,0.1)
+		# Ss=[-25, -20, -15, -10, -5, 0, 5, 10, 15, 20, 25]
+		Cost=np.zeros(len(Ss))
+		for i,S in enumerate(Ss):
+			V=speed_astronaut(S)
+			Cost[i] = SANTEE(80,0,V,S,g=1.6)/V
+		plt.plot(Ss,Cost)
+		plt.title(title, fontsize=15)
+		plt.xlabel(r'Slope [%]', fontsize=15)	
+		plt.ylabel(r'Energy [J/m]]', fontsize=15)
+		plt.grid()
+		plt.show()
+
+
 if __name__ == '__main__':
 	for i in range(len(list_graphs)):
 		print (i,':',list_graphs[i])
@@ -177,6 +222,6 @@ if __name__ == '__main__':
 	if len(sys.argv)==2:
 		i = int(sys.argv[1])
 	else:
-		i = int(input('Select graph: enter Index from 0 to {}: '.format(len(list_graphs)) ))
+		i = int(input('Select graph: enter Index from 0 to {}: '.format(len(list_graphs)-1) ))
 
-	massive_plots(list_graphs[i])
+	choose_and_plot(list_graphs[i])

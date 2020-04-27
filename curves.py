@@ -59,8 +59,7 @@ Vs=np.linspace(0,10,5)
 Ys=np.zeros((len(Vs),len(Gs)))
 for iv,V in enumerate(Vs):
 	for ig,G in enumerate(Gs):
-		Ys[iv,ig]=(SANTEE(W,L,V,G,1.0,g=1.6))
-	
+	   Ys[iv,ig]=SANTEE(W,L,V,G,1.0,g=1.6)
 	plt.plot(Gs, Ys[iv, :], label=r'V = '+str(V))
 
 plt.title('SANTEE',fontsize=15)

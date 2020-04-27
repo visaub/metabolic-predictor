@@ -38,6 +38,7 @@ def docs():
 def subjects(kind=''): 
 	if 'type' in request.args and request.args['type']=='list':
 		list_users_traverse = os.listdir('traverse/temp')
+		list_users_traverse.sort()
 		return jsonify(list_users_traverse)
 	ID = None
 	if 'id' in request.args:
@@ -171,6 +172,20 @@ def add_route():
 		# write to energy
 
 	return ("OK. Traverse "+filename+" added to subject: "+ID,200)
+
+
+@app.route('/api/predictions_ready/', methods=['GET'])
+@app.route('/api/predictions_ready', methods=['GET'])
+def ready():
+	list_users = os.listdir('traverse/temp/')
+	dict_return ={}
+	for ID in list_users:
+		if ID+'.h5' in os.listdir('trained_models/'):
+			dict_return[ID] = True
+		else:
+			dict_return[ID] = False
+	return jsonify(dict_return)
+
 
 
 @app.route('/api/predict/', methods=['POST'])
