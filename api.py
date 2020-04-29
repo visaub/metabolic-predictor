@@ -50,7 +50,7 @@ def subjects(kind=''):
 		if ID in list_users_traverse:
 			list_users_traverse=[ID]
 		else: 
-			return "Error. There is no subject with an id: <b>"+ID+"</b>"
+			return ("Error. There is no subject with an id: <b>"+ID+"</b>",400)
 	for u in list_users_traverse:
 		if u not in dict_users:
 			dict_users[u] = {}
@@ -69,15 +69,15 @@ def get_route(ID=None, traverse=None):
 	# if 'id' in request.args:
 	# 	ID = request.args['id']
 	if not ID or not traverse:
-		return "Error. Please, specify ID and traverse on the API, <b>/api/route/ID/traverse</b>"
+		return ("Error. Please, specify ID and traverse on the API, <b>/api/route/ID/traverse</b>",400)
 	prefix='energy/temp/'
 	if ID not in os.listdir('traverse/temp/'):
-		return "Error. Subject with ID: <b>"+ID+"</b> is not registered"
+		return ("Error. Subject with ID: <b>"+ID+"</b> is not registered",400)
 	if traverse+'.csv' not in os.listdir('energy/temp/'+ID):
 		prefix='traverse/temp/'
 		if traverse+'.csv' not in os.listdir('traverse/temp/'+ID):
-			return "Error. Traverse does not exist"
-		return "Error. Traverse has no energy"
+			return ("Error. Traverse does not exist",400)
+		return ("Error. Traverse has no energy",400)
 
 	astronaut = explorer(ID=ID)
 	df=astronaut.read_temp(ALL=False, traverse_name=traverse)[0]
@@ -108,14 +108,16 @@ def get_route(ID=None, traverse=None):
 
 
 
-@app.route('/api/route', methods=['POST'])
+@app.route('/api/route', methods=['POST','GET'])
 # Add traverse to the database
 def add_route():
+	if request.method == 'GET':
+		return ("Error. Please, specify ID and traverse on the API, <b>/api/route/ID/traverse</b>",400)
 	if request.method == 'POST':
 		list_users_traverse = os.listdir('traverse/temp')
 		json = request.json
 		if "ID" not in json or "elements" not in json or "data" not in json or 'traverse type' not in json:
-			return "Error. Submission incomplete"
+			return ("Error. Submission incomplete",400)
 		ID = json["ID"]
 		elements=json["elements"]
 		traverse_type=json["traverse type"]
@@ -191,11 +193,11 @@ def predict():
 
 	json = request.json
 	if "ID" not in json or "data" not in json:
-		return "Error. Submission incomplete"
+		return ("Error. Submission incomplete",400)
 	ID = json["ID"]
 	data=json["data"]
 	if ID not in os.listdir('traverse/temp/'):
-		return "Error. Subject with ID: <b>"+ID+"</b> is not registered"
+		return ("Error. Subject with ID: <b>"+ID+"</b> is not registered",400)
 
 	refresh=False
 	if 'refresh' in request.args:
