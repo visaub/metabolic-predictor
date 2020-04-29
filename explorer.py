@@ -16,20 +16,23 @@ def generate_traverses(num_iters=100, input_model='PL', plot_it=False, ID=False,
 	prefix='temp/'+ID+'/'
 	os.mkdir('traverse/'+prefix)
 	os.mkdir('energy/'+prefix)
+
+	gravity=9.8
+	eta=1.0
+	weight=np.random.uniform(50,90)
+	if env:  # if there is an environment
+		gravity=env.gravity
+		eta=env.eta
+		if env.weight:
+			weight=env.weight
+		if env.load:
+			load=env.load
 	
 	for i in range(num_iters):
-		gravity=9.8
-		eta=1.0
-		weight=np.random.uniform(50,90)
 		load=np.random.uniform(0,30)
-		if env:  # if there is an environment
-			gravity=env.gravity
-			eta=env.eta
-			if env.weight:
-				weight=env.weight
-			if env.load:
-				load=env.load
-		
+		if env.load:
+			load=env.load
+
 		precision=60   # Time between samples
 		total_time=7200 # Total time in Seconds
 		number_of_samples=int(total_time/precision)

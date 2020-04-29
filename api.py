@@ -6,10 +6,10 @@ import numpy as np
 import requests as r
 
 from keras import layers       # We have to use Theano instead of Tensorflow
-from keras.models import load_model, Sequential
+from keras.models import Sequential
 
 from explorer import explorer
-from learn import find_nn
+from learn import find_nn, load_nn_model
 
 app = flask.Flask(__name__)
 app.config["DEBUG"] = True
@@ -109,7 +109,6 @@ def get_route(ID=None, traverse=None):
 
 
 @app.route('/api/route', methods=['POST'])
-@app.route('/api/route/', methods=['POST'])
 # Add traverse to the database
 def add_route():
 	if request.method == 'POST':
@@ -147,8 +146,8 @@ def add_route():
 			load.append(data[t]['Load'])
 			velocity.append(data[t]['Velocity'])
 			slope.append(data[t]['Slope'])
-			eta.append(0.7)
-			gravity.append(9.6)
+			eta.append(1.0)			# Not implemented yet
+			gravity.append(9.8)     # Not implemented yet
 
 		df = pd.DataFrame({	'TIME': TIME,
 			'X':x,
@@ -174,7 +173,6 @@ def add_route():
 	return ("OK. Traverse "+filename+" added to subject: "+ID,200)
 
 
-@app.route('/api/predictions_ready/', methods=['GET'])
 @app.route('/api/predictions_ready', methods=['GET'])
 def ready():
 	list_users = os.listdir('traverse/temp/')
@@ -187,8 +185,6 @@ def ready():
 	return jsonify(dict_return)
 
 
-
-@app.route('/api/predict/', methods=['POST'])
 @app.route('/api/predict', methods=['POST'])
 #Predict Rate at an instance
 def predict():
@@ -200,7 +196,11 @@ def predict():
 	data=json["data"]
 	if ID not in os.listdir('traverse/temp/'):
 		return "Error. Subject with ID: <b>"+ID+"</b> is not registered"
-	
+
+	refresh=False
+	if 'refresh' in request.args:
+		refresh = request.args['refresh']
+
 	TIME=list(map(int,data.keys()))
 	TIME.sort()
 	TIME=list(map(str,TIME))
@@ -216,19 +216,24 @@ def predict():
 	E=explorer(ID = ID)
 	input_names = ['Weight', 'Load', 'Velocity', 'Slope']
 	
-	if E.ID+'.h5' not in os.listdir('trained_models/'):
-		model, results = find_nn(E, input_names, epochs=10)
+	if refresh or E.ID+'.h5' not in os.listdir('trained_models/'):
+		find_nn(E)
+		# model, results = find_nn(E, input_names)
+		new_model = load_nn_model(E.ID)
 	else:
-		model = load_model('trained_models/'+E.ID+'.h5')
+		# model = load_model('trained_models/'+E.ID+'.h5')
+		new_model = load_nn_model(E.ID)
 
-	x = E[input_names]
-	y = model.predict(x)
+	X = np.array([weight,load,velocity,slope]).transpose()
+	y = new_model.predict(X)
+	print(X.shape)
+	print(y.shape)
 	# conda install m2w64-toolchain
 	dict_return = json
 	dict_return['Rate Predicted']=[]
 	for i in range(len(TIME)):
-		dict_return['data'][TIME[i]]['Rate Predicted'] = float(y[i])
-		dict_return['Rate Predicted'].append(float(y[i]))
+		dict_return['data'][TIME[i]]['Rate Predicted'] = float(y[i,0])
+		dict_return['Rate Predicted'].append(float(y[i,0]))
 	return jsonify(dict_return)
 
 
@@ -241,11 +246,6 @@ def predict():
 	# 	'Slope': slope,
 	# 	'Eta': eta,
 	# 	'Gravity': gravity})
-
-@app.route('/test')
-def testtt():
-	model = load_model('trained_models/GG.h5')	
-	return 'GG'
 
 
 

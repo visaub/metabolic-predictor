@@ -9,19 +9,18 @@ import sys
 import pandas as pd
 import time
 
-#pd.core.frame.DataFrame
-
-
 def cal2jul(cal):
 	return 4.184*cal
+
+def btu_to_watts(btu):
+	return btu*0.29307
 
 # MODELS
 # W: body height, L: external load, V: velocity, S: slope %
 # Output: Metabolic Rate W = J/s
 def GG(W,L,V=0.0, S=0.0, eta=1.0, g=9.8):
 	# Givoni-Goldman model, 1971
-	return eta*(W+L)*(2.3+0.32*max(V*3.6-2.5,0)**1.65+S*(0.2+0.07*max(V*3.6-2.5,0)))*4184/3600
-
+	return (g/9.8)*eta*(W+L)*(2.3+0.32*max(V*3.6-2.5,0)**1.65+S*(0.2+0.07*max(V*3.6-2.5,0)))*4184/3600
 
 
 def GG_running(W,L,V=0.0, S=0.0, eta=1.0, g=9.8):
@@ -33,7 +32,7 @@ def PL(W,L=0.0, V=0.0, S=0.0, eta=1.0, g=9.8):
 	return 1.5*W+2.0*(W+L)*((L/W)**2)+eta*(W+L)*(1.5*V**2+0.35*V*S)
 
 def PL_santee(W,L=0.0, V=0.0, S=0.0, eta=1.0, g=9.8):
-	mr = PL(W, L, V, S, eta, g)
+	mr = PL(W, L, V, S, eta, g)    #PANDOLF EQ
 	c = eta*( (S*(W+L)*V )/3.5 - (((W+L)*(S+6)**2)/W) +(25-V**2))
 	delta=0.2
 	if S>=delta:

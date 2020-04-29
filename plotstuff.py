@@ -4,7 +4,7 @@ import sys
 
 # from models import GG, PL, ACSM, SANTEE
 
-list_graphs=['GG_grade plots', 'PL_grade plots', 'GG walking vs running', 'GG transition speed', 'PL_santee speed_grade plots','Speed Astronaut (Marquez, 2008)', 'SANTEE (2001)', 'Cost of Transport, JMarquez+Santee']
+list_graphs=['GG_grade plots', 'PL_grade plots', 'GG walking vs running', 'GG transition speed', 'PL_santee speed_grade plots','Speed Astronaut (Marquez, 2008)', 'SANTEE (2001)', 'SANTEE (2001) 2', 'Cost of Transport, JMarquez+Santee']
 
 
 from models import GG as GG
@@ -185,7 +185,7 @@ def choose_and_plot(title):
 
 
 	if title=='SANTEE (2001)':
-		Ss=np.arange(-30,30,0.1)
+		Ss=np.arange(-20,20,0.1)
 		Vs=np.linspace(0,5,6)
 		Ys=np.zeros((len(Vs),len(Ss)))
 		for iv,V in enumerate(Vs):
@@ -193,12 +193,26 @@ def choose_and_plot(title):
 	   			Ys[iv,i]=SANTEE(80,0,V,S,1.0,g=1.6)
 			plt.plot(Ss, Ys[iv, :], label=r'V = '+str(V)+' m/s')
 		plt.title(title, fontsize=15)
-		plt.xlabel(r'Speed [m/s]', fontsize=15)	
+		plt.xlabel(r'Slope [%]', fontsize=15)	
 		plt.ylabel(r'Metabolic Rate [W]', fontsize=15)
 		plt.grid()
 		plt.legend(fontsize=10)
 		plt.show()
 
+	if title=='SANTEE (2001) 2':
+		Ss=np.arange(-20,20,4)
+		Vs=np.linspace(0,5,100)
+		Ys=np.zeros((len(Vs),len(Ss)))
+		for i,S in enumerate(Ss):
+			for iv,V in enumerate(Vs):
+	   			Ys[iv,i]=SANTEE(80,0,V,S,1.0,g=1.6)
+			plt.plot(Vs, Ys[:, i], label=r'S = '+str(S)+'%')
+		plt.title(title, fontsize=15)
+		plt.xlabel(r'Velocity [m/s]', fontsize=15)	
+		plt.ylabel(r'Metabolic Rate [W]', fontsize=15)
+		plt.grid()
+		plt.legend(fontsize=10)
+		plt.show()
 
 	if title=='Cost of Transport, JMarquez+Santee':
 		Ss=np.arange(-30,30,0.1)
@@ -206,7 +220,7 @@ def choose_and_plot(title):
 		Cost=np.zeros(len(Ss))
 		for i,S in enumerate(Ss):
 			V=speed_astronaut(S)
-			Cost[i] = SANTEE(80,0,V,S,g=1.6)/V
+			Cost[i] = SANTEE(80,20,V,S,g=1.6)/V
 		plt.plot(Ss,Cost)
 		plt.title(title, fontsize=15)
 		plt.xlabel(r'Slope [%]', fontsize=15)	
