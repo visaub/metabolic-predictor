@@ -48,7 +48,7 @@ def ACSM(W,L,V=0.0,S=0.0, eta=1.0, g=9.8):
 
 def SANTEE(W,L,V=0.0,S=0.0, eta=1.0, g=9.8):
 	alpha=np.arctan(S/100)  # angle
-	W_level=(3.28*(W+L)+71.1)*(0.661*V*np.cos(alpha)+0.115)
+	W_level = (3.28 * (W+L) + 71.1) * (0.661* V *np.cos(alpha) + 0.115)
 	if alpha>0:
 		W_slope=3.5*(W+L)*g*V*np.sin(alpha)
 	elif alpha<=0:
