@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 import copy
 
-from explorer import explorer
+from explorer import Explorer
 from models import write_traverse, add_energy, PL, ACSM, GG,  GG_running, PL_santee
 
 from keras import layers

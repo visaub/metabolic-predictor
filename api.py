@@ -8,7 +8,7 @@ import requests as r
 from keras import layers       # We have to use Theano instead of Tensorflow
 from keras.models import Sequential
 
-from explorer import explorer
+from explorer import Explorer
 from learn import find_nn, load_nn_model
 
 app = flask.Flask(__name__)
@@ -79,7 +79,7 @@ def get_route(ID=None, traverse=None):
 			return ("Error. Traverse does not exist",400)
 		return ("Error. Traverse has no energy",400)
 
-	astronaut = explorer(ID=ID)
+	astronaut = Explorer(ID=ID)
 	df=astronaut.read_temp(ALL=False, traverse_name=traverse)[0]
 	TIME=df['TIME']
 	weight=df['Weight']
@@ -215,7 +215,7 @@ def predict():
 		slope.append(data[t]['Slope'])
 		# eta.append(data[t]['Eta'])
 
-	E=explorer(ID = ID)
+	E=Explorer(ID = ID)
 	input_names = ['Weight', 'Load', 'Velocity', 'Slope']
 	
 	if refresh or E.ID+'.h5' not in os.listdir('trained_models/'):

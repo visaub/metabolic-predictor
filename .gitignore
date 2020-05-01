@@ -29,3 +29,6 @@ pa_reload.py
 
 # Sandbox
 curves.py     
+energyRate.py
+sandbox.py
+dirt.py
