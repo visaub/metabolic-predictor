@@ -18,7 +18,7 @@ class Environment():
 
 
 class Explorer():    # Most important Class
-	def __init__(self,input_model='PL',num_iters=10, ID=False, gravity=9.8, weight=None, load=None, eta=1.0):
+	def __init__(self,input_model='PL',num_iters=10, ID=False, ALL=True, gravity=9.8, weight=None, load=None, eta=1.0, traverse_name=None):
 		env=Environment(gravity,eta,weight,load)
 		if ID:
 			self.ID = ID
@@ -33,7 +33,7 @@ class Explorer():    # Most important Class
 		if not ID:
 			self.ID = generate_traverses(num_iters, input_model=input_model, env=env)
 
-		self.list_dfs=self.read_temp()
+		self.list_dfs=self.read_temp(ALL=ALL, traverse_name=traverse_name)
 		self.list_Xs=['TIME','Weight','Load','Velocity','Slope']
 		self.list_Ys=['Rate']
 		#my_dataframe.columns.values
@@ -59,8 +59,16 @@ class Explorer():    # Most important Class
 		list_dfs=[]
 		dataFiles = [ f for f in os.listdir(prefix) if f.endswith('.csv') ]
 		if ALL==False:
-			if traverse_name+'.csv' in dataFiles:
-				dataFiles = [traverse_name+'.csv']
+			if type(traverse_name)==str:
+				if traverse_name+'.csv' in dataFiles:
+					dataFiles = [traverse_name+'.csv']
+			if type(traverse_name)==list:
+				dataFiles_aux=[]
+				for traverse in traverse_name:
+					if traverse+'.csv' in dataFiles:
+						dataFiles_aux.append(traverse+'.csv')
+				dataFiles = dataFiles_aux
+
 		for f in dataFiles:
 			df=pd.read_csv(prefix+f)
 			TIME=np.array(df['TIME'])
@@ -177,7 +185,7 @@ def generate_traverses(num_iters=100, input_model='PL', plot_it=False, ID=False,
 			plt.xlabel('Distance [m]')
 			plt.ylabel('Height [m]')
 			plt.grid()
-			plt.title('Traverse example 6')#+str(i+1))
+			plt.title('Traverse example '+str(i+1))
 			plt.xlim(0,xp[-1])
 			plt.ylim(min(yp)/1.2,1.2*max(yp))
 			plt.show()

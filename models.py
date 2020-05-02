@@ -91,7 +91,7 @@ def write_traverse(l_points, filename='', velocity=1.25, weight=80, load=0, prec
 	# 1.25 m/s == 4.5 km/h. velocity could be a vector.  precision: 60 seconds of unit of time
 	xp = np.array(l_points[0])
 	yp = np.array(l_points[1])
-	if type(velocity)==type(1.0) or type(velocity)==type(1): #Velocity either a constant float or integer
+	if type(velocity)==float or type(velocity)==int: #IF the velocity is not a Vector, but a single number
 		meters_per_unit_of_time = precision*velocity
 		x = np.array([j*meters_per_unit_of_time for j in range(int(xp[-1]/meters_per_unit_of_time)+1)])
 	else:
@@ -147,7 +147,7 @@ def add_energy(filename_input,filename_output,input_model=0):
 	Eta=np.array(df['Eta'])
 	Gravity=np.array(df['Gravity'])
 	
-	Rate=np.array(list(map(model,Weight,Load,Velocity,Slope,Eta,Gravity)))
+	Rate=np.array(list(map(model,Weight,Load,Velocity,Slope,Eta,Gravity)))     # model can be anything
 	
 	Fatigue=np.zeros(len(Rate))
 	for i, instant_rate in enumerate(Rate[:-1]):

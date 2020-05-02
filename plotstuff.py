@@ -2,9 +2,19 @@ import numpy as np
 import matplotlib.pyplot as plt
 import sys
 
-# from models import GG, PL, ACSM, SANTEE
 
-list_graphs=['GG_grade plots', 'PL_grade plots', 'GG walking vs running', 'GG transition speed', 'PL_santee speed_grade plots','Speed Astronaut (Marquez, 2008)', 'SANTEE (2001)', 'SANTEE (2001) 2', 'Cost of Transport, JMarquez+Santee']
+list_graphs=[
+			'GG_grade plots', 
+			'PL_grade plots', 
+			'GG walking vs running',
+			'GG transition speed', 
+			'PL_santee speed_grade plots',
+			'Speed Astronaut (Marquez, 2008)', 
+			'SANTEE (2001)', 'SANTEE (2001) 2',
+			'Cost of Transport, JMarquez+Santee',
+			'Evolution of training',
+			'Prediction model curves'
+			]
 
 
 from models import GG as GG
@@ -13,6 +23,8 @@ from models import PL as PL
 from models import PL_santee as PL_santee
 from models import speed_astronaut as speed_astronaut
 from models import SANTEE
+from explorer import Explorer
+from learn import find_nn, load_nn_model
 
 def choose_and_plot(title):
 
@@ -227,6 +239,74 @@ def choose_and_plot(title):
 		plt.ylabel(r'Energy [J/m]]', fontsize=15)
 		plt.grid()
 		plt.show()
+
+
+	if title=='Evolution of training':
+		# E=Explorer(ID='subject_test_11',ALL=False, traverse_name=['1','4','5','6','7','8','9','10','11'])
+		E=Explorer(ID='proba', ALL=False, traverse_name=list(map(str, range(3,50))))
+		E_test=Explorer(ID='proba', ALL=False, traverse_name='1')
+
+
+		# input_names=['Weight','Load','Velocity','Slope']
+		input_names=['Load','Velocity','Slope']
+		TIME = E_test['TIME']
+		X = E_test[input_names]
+		y = E_test['Rate']
+
+		for epochs in [1,2,5,10,20,50,100,200,500,1000]:
+			_, results = find_nn(E, epochs=epochs, input_names=input_names)
+			new_model = load_nn_model(E.ID, input_names=input_names)
+		
+			y_predicted = new_model.predict(X)
+			
+			plt.plot(TIME, y, 'b', label='Real')
+			plt.plot(TIME, y_predicted, 'r', label='Prediction')
+
+			plt.xlabel('TIME [s]')
+			plt.ylabel('Metabolic Rate [W]')
+			plt.grid()
+			plt.title('Reality vs prediction, nºepochs='+str(epochs))
+			plt.xlim(0,TIME[-1])
+
+			plt.legend(fontsize=10)
+			
+			plt.show()
+
+	if title=='Prediction model curves':
+		input_names=['Weight','Load','Velocity','Slope']
+		E=Explorer(ID='proba')
+		# find_nn(E, epochs=100, input_names=input_names)
+		new_model = load_nn_model(E.ID, input_names=input_names)
+
+		Gs=np.arange(24,-4.1, -4)
+		Vs=np.linspace(0, 20, 100)   #km/h
+		W,L=70,0        #We don't care yet
+		X=np.zeros((len(Gs),len(Vs),len(input_names)))
+
+		for ig,G in enumerate(Gs):
+			for iv,V in enumerate(Vs):
+				X[ig,iv,:] = np.array([W,L,V/3.6,G])
+
+				# new_model.predict(W,L,V/3.6,G,1.0)/(W+L)
+			# print(X.shape)
+			# print(X[ig,:,:].shape)
+			Y = new_model.predict(X[ig,:,:])/(W+L)
+
+			plt.plot( Vs, Y, label='Slope = {}%'.format(G) )
+
+		# Y = new_model.predict(X)
+
+			
+		plt.title('Prediction', fontsize=15)
+		plt.xlabel(r'V $[km/h]$',fontsize=15)
+		plt.ylabel(r'MR [W/kg]', fontsize=15)
+		# plt.ylim(0,12) 
+		plt.xlim(0,12) 
+		plt.grid()
+		plt.legend(fontsize=10)  #change pos soon
+		plt.show()
+
+
 
 
 if __name__ == '__main__':

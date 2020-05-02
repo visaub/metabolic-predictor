@@ -203,6 +203,10 @@ def predict():
 	if 'refresh' in request.args:
 		refresh = request.args['refresh']
 
+	epochs=100
+	if 'epochs' in request.args:
+		epochs = request.args['epochs']
+
 	TIME=list(map(int,data.keys()))
 	TIME.sort()
 	TIME=list(map(str,TIME))
@@ -216,15 +220,16 @@ def predict():
 		# eta.append(data[t]['Eta'])
 
 	E=Explorer(ID = ID)
+	
 	input_names = ['Weight', 'Load', 'Velocity', 'Slope']
+	if 'input_names' in request.args:
+		input_names = list(request.args['input_names'])
 	
 	if refresh or E.ID+'.h5' not in os.listdir('trained_models/'):
-		find_nn(E)
-		# model, results = find_nn(E, input_names)
-		new_model = load_nn_model(E.ID)
+		find_nn(E, epochs = epochs)
+		new_model = load_nn_model(E.ID, input_names=input_names)
 	else:
-		# model = load_model('trained_models/'+E.ID+'.h5')
-		new_model = load_nn_model(E.ID)
+		new_model = load_nn_model(E.ID, input_names=input_names)
 
 	X = np.array([weight,load,velocity,slope]).transpose()
 	y = new_model.predict(X)
