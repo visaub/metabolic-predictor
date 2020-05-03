@@ -56,11 +56,6 @@ def find_nn(E, input_names=['Weight','Load','Velocity','Slope'], epochs=100):
 		for input_variable in feature.split('*'):
 			inputs[:,k]/=normalization[input_variable]
 
-	# inputs[:,0]/=90.0
-	# inputs[:,1]/=50.0
-	# inputs[:,2]/=2.0
-	# inputs[:,3]/=10.0
-
 	rate=E[['Rate']]
 	rate/=normalization['Rate']     #  # rate/=2000.0     # Normalization
 
@@ -111,5 +106,5 @@ def load_nn_model(name_model, normalization=normalization, input_names=input_nam
 	# plt.ylabel('loss')
 	# plt.xlabel('epoch')
 	# plt.legend(['train', 'test'], loc='upper left')
-
+	# score = model.evaluate(x_test, y_test, batch_size=128)
 	# plt.show()
