@@ -9,6 +9,8 @@ list_graphs=[
 			'GG walking vs running',
 			'GG transition speed', 
 			'PL_santee speed_grade plots',
+			'Energy Expenditure (2019)',
+			'Specfic Cost of Transport',
 			'Speed Astronaut (Marquez, 2008)', 
 			'SANTEE (2001)', 'SANTEE (2001) 2',
 			'Cost of Transport, JMarquez+Santee',
@@ -23,6 +25,9 @@ from models import PL as PL
 from models import PL_santee as PL_santee
 from models import speed_astronaut as speed_astronaut
 from models import SANTEE
+from models import EE
+from models import MODELS
+
 from explorer import Explorer
 from learn import find_nn, load_nn_model
 
@@ -135,6 +140,53 @@ def choose_and_plot(title):
 		plt.show()
 
 
+	if title =='Specfic Cost of Transport':
+		W,L=70,0        #We don't care yet
+		Vs=np.linspace(0.1,8,100)
+		Y=np.zeros(len(Vs))
+
+		G=0
+		for model_key in ['PL', 'GG', 'PL_santee', 'EE']:
+			model=MODELS[model_key]
+			for iv,V in enumerate(Vs):
+				Y[iv] = model(W=W, L=L, V=V, S=G, g=9.8)/(V*(W+L))
+			
+			plt.plot( Vs, Y, label=model_key+f', Optimal Speed=%.3f m/s'%Vs[list(Y).index(min(Y))] )
+			# plt.plot( Vs[list(Y).index(min(Y))], min(Y), 'r*', label = f'Optimal Speed = %.3f m/s'%Vs[list(Y).index(min(Y))] )
+
+		plt.title(r'Specfic Cost of Transport $[g=9.8m·s^{-2}]$', fontsize=15)
+		plt.xlabel(r'V $[m/s]$', fontsize=15)
+		plt.ylabel(r'Cost of Transport $[J·m^{-1}·kg^{-1}]$', fontsize=15)
+		plt.xlim(0,6)
+		plt.ylim(0,max(Y)*1.5)
+		plt.grid()
+		plt.legend(fontsize=10)
+		plt.show()
+
+
+	if title =='Energy Expenditure (2019)':
+		W,L=70,0        #We don't care yet
+		Gs=np.arange(24,-12.1, -4)
+		Vs=np.linspace(0.1,8,100)
+		Y=np.zeros(len(Vs))
+
+		G=0
+		# for ig, G in enumerate(Gs):
+		for iv,V in enumerate(Vs):
+			Y[iv] = EE(W=W, L=L, V=V, S=G, g=9.8)/(V*(W+L))
+			
+		plt.plot( Vs, Y, label=str(G)+'%')
+		plt.plot( Vs[list(Y).index(min(Y))], min(Y), 'r*', label = f'Optimal Speed = %.3f m/s'%Vs[list(Y).index(min(Y))] )
+
+		plt.title('Specific Cost of Transport using Energy Expenditure (2019)', fontsize=15)
+		plt.xlabel(r'V $[m/s]$', fontsize=15)
+		plt.ylabel(r'Cost of Transport $[J·m^{-1}·kg^{-1}]$', fontsize=15)
+		plt.xlim(0,6)
+		plt.ylim(0,max(Y)*1.5)
+		plt.grid()
+		plt.legend(fontsize=10)
+		plt.show()
+
 	if title == 'GG transition speed':
 
 		def binary_search(funct, a, b, steps=20):
@@ -202,7 +254,7 @@ def choose_and_plot(title):
 		Ys=np.zeros((len(Vs),len(Ss)))
 		for iv,V in enumerate(Vs):
 			for i,S in enumerate(Ss):
-	   			Ys[iv,i]=SANTEE(80,0,V,S,1.0,g=1.6)
+	   			Ys[iv,i]=SANTEE(80,0,V,S,eta=1.0,g=1.6)
 			plt.plot(Ss, Ys[iv, :], label=r'V = '+str(V)+' m/s')
 		plt.title(title, fontsize=15)
 		plt.xlabel(r'Slope [%]', fontsize=15)	
@@ -217,7 +269,7 @@ def choose_and_plot(title):
 		Ys=np.zeros((len(Vs),len(Ss)))
 		for i,S in enumerate(Ss):
 			for iv,V in enumerate(Vs):
-	   			Ys[iv,i]=SANTEE(80,0,V,S,1.0,g=1.6)
+	   			Ys[iv,i]=SANTEE(80,0,V,S,eta=1.0,g=1.6)
 			plt.plot(Vs, Ys[:, i], label=r'S = '+str(S)+'%')
 		plt.title(title, fontsize=15)
 		plt.xlabel(r'Velocity [m/s]', fontsize=15)	
@@ -242,13 +294,18 @@ def choose_and_plot(title):
 
 
 	if title=='Evolution of training':
-		# E=Explorer(ID='subject_test_11',ALL=False, traverse_name=['1','4','5','6','7','8','9','10','11'])
-		E=Explorer(ID='proba', ALL=False, traverse_name=list(map(str, range(3,50))))
-		E_test=Explorer(ID='proba', ALL=False, traverse_name='1')
+		# CAREFUL
 
+		# E=Explorer(ID='subject_test_11',ALL=False, traverse_name=['1','4','5','6','7','8','9','10','11'])
+		E=Explorer(ID='EE_3', ALL=False, traverse_name=list(map(str, range(3,50))))
+		print(E.X.shape)
+		E_test=Explorer(ID='EE_3', ALL=False, traverse_name='2')
+		E_test.recombine_features(2)
+		E.recombine_features(2)
 
 		# input_names=['Weight','Load','Velocity','Slope']
 		input_names=['Load','Velocity','Slope']
+		input_names=['Weight', 'Load', 'Velocity', 'Slope', 'Weight*Weight', 'Weight*Load', 'Load*Load', 'Weight*Velocity', 'Load*Velocity', 'Velocity*Velocity', 'Weight*Slope', 'Load*Slope', 'Velocity*Slope', 'Slope*Slope']
 		TIME = E_test['TIME']
 		X = E_test[input_names]
 		y = E_test['Rate']
@@ -267,6 +324,7 @@ def choose_and_plot(title):
 			plt.grid()
 			plt.title('Reality vs prediction, nºepochs='+str(epochs))
 			plt.xlim(0,TIME[-1])
+			plt.ylim(0.6*min(min(y_predicted),min(y)), 1.25*max(max(y_predicted),max(y)))
 
 			plt.legend(fontsize=10)
 			
@@ -274,8 +332,9 @@ def choose_and_plot(title):
 
 	if title=='Prediction model curves':
 		input_names=['Weight','Load','Velocity','Slope']
-		E=Explorer(ID='proba')
+		E=Explorer(ID='EE_3')
 		# find_nn(E, epochs=100, input_names=input_names)
+		find_nn(E, input_names=input_names)
 		new_model = load_nn_model(E.ID, input_names=input_names)
 
 		Gs=np.arange(24,-4.1, -4)

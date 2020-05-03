@@ -223,7 +223,7 @@ def predict():
 	
 	input_names = ['Weight', 'Load', 'Velocity', 'Slope']
 	if 'input_names' in request.args:
-		input_names = list(request.args['input_names'])
+		input_names = request.args['input_names'].split(',')
 	
 	if refresh or E.ID+'.h5' not in os.listdir('trained_models/'):
 		find_nn(E, epochs = epochs)

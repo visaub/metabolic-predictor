@@ -4,7 +4,7 @@ import os
 import numpy as np
 import pandas as pd
 
-# At the moment I'll be using Pandolf Load model with L=0 and eta=1.0 for the examples
+# I'll be using predifined models to create examples. 
 # PL(W, L=0.0, V=0.0, S=0.0, eta=1.0) (becomes)-> 1.5*W + (W+L)*(1.5*V^2+0.35*V*S)
 
 
@@ -18,14 +18,14 @@ class Environment():
 
 
 class Explorer():    # Most important Class
-	def __init__(self,input_model='PL',num_iters=10, ID=False, ALL=True, gravity=9.8, weight=None, load=None, eta=1.0, traverse_name=None):
+	def __init__(self,input_model='PL',num_iters=10, ID=False, ALL=True, gravity=9.8, weight=None, load=None, eta=1.0, traverse_name=None, noise=0.05):
 		env=Environment(gravity,eta,weight,load)
 		if ID:
 			self.ID = ID
 			list_users_traverse = os.listdir('traverse/temp')
 			if ID not in list_users_traverse:
 				try:
-					self.ID = generate_traverses(num_iters, ID=ID, input_model=input_model, env=env) 
+					self.ID = generate_traverses(num_iters, ID=ID, input_model=input_model, env=env, noise=noise) 
 					print("Created new subject: ID = "+ID)
 				except FileExistsError:
 					pass
@@ -137,7 +137,7 @@ class Explorer():    # Most important Class
 		self.list_Xs=list_Xs			
 				
 
-def generate_traverses(num_iters=100, input_model='PL', plot_it=False, ID=False, env=None, save=True):
+def generate_traverses(num_iters=100, input_model='PL', plot_it=False, ID=False, env=None, save=True, noise=0.0):
 	#os.mkdir('traverse/test')
 	prefix=''
 	if not ID: #if there is no subject ID, a new one is created
@@ -192,11 +192,10 @@ def generate_traverses(num_iters=100, input_model='PL', plot_it=False, ID=False,
 
 		if save==True:
 			write_traverse(l_points, filename = prefix+str(i), velocity=velocity, weight=weight, load=load, precision=precision, eta=eta, gravity=gravity)
-			add_energy(filename_input = prefix+str(i), filename_output=prefix+str(i), input_model=input_model)	
+			add_energy(filename_input = prefix+str(i), filename_output=prefix+str(i), input_model=input_model, noise=noise)	
 	return ID
 		
 
-#def generate_
 
 if __name__ == '__main__':
 	generate_traverses(num_iters=5, plot_it=True, save=False)  # To showcase that the code runs

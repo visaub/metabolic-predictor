@@ -18,20 +18,20 @@ def btu_to_watts(btu):
 # MODELS
 # W: body height, L: external load, V: velocity, S: slope %
 # Output: Metabolic Rate W = J/s
-def GG(W,L,V=0.0, S=0.0, eta=1.0, g=9.8):
+def GG(W, L, V=0.0, S=0.0, eta=1.0, g=9.8):
 	# Givoni-Goldman model, 1971
 	return (g/9.8)*eta*(W+L)*(2.3+0.32*max(V*3.6-2.5,0)**1.65+S*(0.2+0.07*max(V*3.6-2.5,0)))*4184/3600
 
 
-def GG_running(W,L,V=0.0, S=0.0, eta=1.0, g=9.8):
+def GG_running(W, L=0.0, V=0.0, S=0.0, eta=1.0, g=9.8):
 	mr = GG(W, L, V, S, eta, g)
 	return (mr+0.47*(900*4184/3600 - mr))*(1+S/100) 
 
 
-def PL(W,L=0.0, V=0.0, S=0.0, eta=1.0, g=9.8):
+def PL(W, L=0.0, V=0.0, S=0.0, eta=1.0, g=9.8):
 	return 1.5*W+2.0*(W+L)*((L/W)**2)+eta*(W+L)*(1.5*V**2+0.35*V*S)
 
-def PL_santee(W,L=0.0, V=0.0, S=0.0, eta=1.0, g=9.8):
+def PL_santee(W, L=0.0, V=0.0, S=0.0, eta=1.0, g=9.8):
 	mr = PL(W, L, V, S, eta, g)    #PANDOLF EQ
 	c = eta*( (S*(W+L)*V )/3.5 - (((W+L)*(S+6)**2)/W) +(25-V**2))
 	delta=0.2
@@ -43,10 +43,10 @@ def PL_santee(W,L=0.0, V=0.0, S=0.0, eta=1.0, g=9.8):
 		return (mr*(S+delta)+(mr-c)*(delta-S))/(2*delta)   #smooth
 
 
-def ACSM(W,L,V=0.0,S=0.0, eta=1.0, g=9.8):
+def ACSM(W, L=0.0, V=0.0, S=0.0, eta=1.0, g=9.8):
 	return (0.1*V/60+1.8*V*S/60+3.5)*20.9*(1.0/60)
 
-def SANTEE(W,L,V=0.0,S=0.0, eta=1.0, g=9.8):
+def SANTEE(W, L=0.0, V=0.0, S=0.0, eta=1.0, g=9.8):
 	alpha=np.arctan(S/100)  # angle
 	W_level = (3.28 * (W+L) + 71.1) * (0.661* V *np.cos(alpha) + 0.115)
 	if alpha>0:
@@ -55,7 +55,13 @@ def SANTEE(W,L,V=0.0,S=0.0, eta=1.0, g=9.8):
 		W_slope=2.4*(W+L)*g*V*np.sin(alpha)*0.3**(abs(alpha)/7.65)
 	return W_level+W_slope
 
-MODELS={'GG':GG, 'PL':PL, 'ACSM':ACSM, 'SANTEE':SANTEE, 'GG_running':GG_running, 'PL_santee':PL_santee}
+def EE(W, L=0.0, V=0.0, S=0.0, eta=1.0, g=9.8):
+	W_level = (g/9.8)*(1.44+1.94*V**0.43+0.24*V**4)
+	W_slope = 0.34*V*S*(1-1.05**(1-1.1**(S+32)))
+	return (W+L)*(W_level+W_slope)
+
+
+MODELS={'GG':GG, 'PL':PL, 'ACSM':ACSM, 'SANTEE':SANTEE, 'GG_running':GG_running, 'PL_santee':PL_santee, 'EE':EE}
 
 
 def metabolic_rate_to_O2(mr):
@@ -132,7 +138,7 @@ def write_traverse(l_points, filename='', velocity=1.25, weight=80, load=0, prec
 #	TIME, RATE, Fatigue, Weight, Load, Velocity, Slope, Eta, Gravity
 
 
-def add_energy(filename_input,filename_output,input_model=0):
+def add_energy(filename_input,filename_output,input_model=0, noise=0.0):
 	model=input_model
 	if input_model in MODELS:  # if input_model is a string identifier
 		model=MODELS[input_model]
@@ -147,7 +153,10 @@ def add_energy(filename_input,filename_output,input_model=0):
 	Eta=np.array(df['Eta'])
 	Gravity=np.array(df['Gravity'])
 	
+
 	Rate=np.array(list(map(model,Weight,Load,Velocity,Slope,Eta,Gravity)))     # model can be anything
+	if noise!=0.0:
+		Rate *= (np.random.normal(loc=1.0, scale=noise, size=len(Rate)))
 	
 	Fatigue=np.zeros(len(Rate))
 	for i, instant_rate in enumerate(Rate[:-1]):
