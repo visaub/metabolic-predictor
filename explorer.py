@@ -1,5 +1,5 @@
 
-from models import write_traverse, add_energy, PL, GG,  GG_running, PL_santee
+from models import write_traverse, add_energy, PL, GG, GG_running, PL_santee, SANTEE, EE
 import os
 import numpy as np
 import pandas as pd
@@ -18,20 +18,17 @@ class Environment():
 
 
 class Explorer():    # Most important Class
-	def __init__(self,input_model='PL',num_iters=10, ID=False, ALL=True, gravity=9.8, weight=None, load=None, eta=1.0, traverse_name=None, noise=0.05):
+	def __init__(self, ID=False, input_model='PL', num_iters=10, ALL=True, gravity=9.8, weight=None, load=None, eta=1.0, traverse_name=None, noise=0.02):
 		env=Environment(gravity,eta,weight,load)
 		if ID:
 			self.ID = ID
 			list_users_traverse = os.listdir('traverse/temp')
 			if ID not in list_users_traverse:
-				try:
-					self.ID = generate_traverses(num_iters, ID=ID, input_model=input_model, env=env, noise=noise) 
-					print("Created new subject: ID = "+ID)
-				except FileExistsError:
-					pass
+				self.ID, env = generate_traverses(num_iters, ID=ID, input_model=input_model, env=env, noise=noise) 
+				print("Created new subject: ID = "+ID)
 
 		if not ID:
-			self.ID = generate_traverses(num_iters, input_model=input_model, env=env)
+			self.ID, env = generate_traverses(num_iters, input_model=input_model, env=env)
 
 		self.list_dfs=self.read_temp(ALL=ALL, traverse_name=traverse_name)
 		self.list_Xs=['TIME','Weight','Load','Velocity','Slope']
@@ -43,6 +40,7 @@ class Explorer():    # Most important Class
 		self.recombined=1
 		self.recombine_features(n=1)
 		self.env=env
+		self.weight=self['Weight'][0]
 
 	def __getitem__(self,column):
 		return np.array(self.df[column])
@@ -168,14 +166,29 @@ def generate_traverses(num_iters=100, input_model='PL', plot_it=False, ID=False,
 		precision=60   # Time between samples
 		total_time=7200 # Total time in Seconds
 		number_of_samples=int(total_time/precision)
-		velocity=np.random.uniform(0,5)  # Constant speed between 0 and 5 m/s
-		xp=[velocity*precision*k for k in range(number_of_samples)] # ASDF
-		yp=[500]  	# Starting altitude
-		S=np.random.uniform(-20,20)  # Starting Slope, between -20% and 20%
-		for k,x in enumerate(xp[:-1]):
-			dx=xp[k+1]-x
-			yp.append(yp[k]+S*dx/100.0)
-			S=S+np.random.uniform(-S/30-2,-S/30+2)
+		velocity=np.zeros(number_of_samples)
+		# xp = [velocity*precision*k for k in range(number_of_samples)] # ASDF
+		xp = np.zeros(number_of_samples)
+		yp = np.zeros(number_of_samples)
+		xp[0] = 0 		# Starting position
+		yp[0] = 500  	# Starting altitude
+		S = np.random.uniform(-20,20)  # Starting Slope, between -20% and 20%
+		V = np.random.uniform(0,5)  # Initial speed between 0 and 5 m/s
+		velocity[0] = V
+		# for k,x in enumerate(xp[:-1]):
+		for k in range(1,number_of_samples):
+			dx = V*precision
+			xp[k] = xp[k-1]+dx
+			yp[k] = yp[k-1]+S*dx/100.0
+
+			V=V+np.random.uniform(-0.5-(V-2.5)/20, 0.5-(V-2.5)/20)/4
+			if V<0.1:
+				V=0.1
+			if V>5:
+				V=5
+			velocity[k] = V
+
+			S=S+np.random.uniform(-S/60-2,-S/60+2)/4
 			if abs(S)>20:
 				S=20*np.sign(S) # Cap of Slope
 		l_points=[xp,yp] 
@@ -193,7 +206,7 @@ def generate_traverses(num_iters=100, input_model='PL', plot_it=False, ID=False,
 		if save==True:
 			write_traverse(l_points, filename = prefix+str(i), velocity=velocity, weight=weight, load=load, precision=precision, eta=eta, gravity=gravity)
 			add_energy(filename_input = prefix+str(i), filename_output=prefix+str(i), input_model=input_model, noise=noise)	
-	return ID
+	return ID, env
 		
 
 

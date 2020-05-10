@@ -29,7 +29,7 @@ def GG_running(W, L=0.0, V=0.0, S=0.0, eta=1.0, g=9.8):
 
 
 def PL(W, L=0.0, V=0.0, S=0.0, eta=1.0, g=9.8):
-	return 1.5*W+2.0*(W+L)*((L/W)**2)+eta*(W+L)*(1.5*V**2+0.35*V*S)
+	return 1.5*W + 2.0*(W+L)*((L/W)**2) + eta*(W+L)*(1.5*V**2+0.35*V*S)
 
 def PL_santee(W, L=0.0, V=0.0, S=0.0, eta=1.0, g=9.8):
 	mr = PL(W, L, V, S, eta, g)    #PANDOLF EQ
@@ -56,8 +56,8 @@ def SANTEE(W, L=0.0, V=0.0, S=0.0, eta=1.0, g=9.8):
 	return W_level+W_slope
 
 def EE(W, L=0.0, V=0.0, S=0.0, eta=1.0, g=9.8):
-	W_level = (g/9.8)*(1.44+1.94*V**0.43+0.24*V**4)
-	W_slope = 0.34*V*S*(1-1.05**(1-1.1**(S+32)))
+	W_level = 1.44+1.94*V**0.43+0.24*V**4
+	W_slope = 0.34*V*S*(1-1.05**(1-1.1**(S+32))) * (g/9.8)
 	return (W+L)*(W_level+W_slope)
 
 
@@ -112,6 +112,7 @@ def write_traverse(l_points, filename='', velocity=1.25, weight=80, load=0, prec
 	for i in range(1,len(Slope)-1):
 		Slope[i]=0.5*(aux[i-1]+aux[i])
 
+	Slope[-1]=Slope[-2]
 	df = pd.DataFrame({	'TIME': TIME,
 						'X':x,
 						'Y':y,
@@ -156,7 +157,7 @@ def add_energy(filename_input,filename_output,input_model=0, noise=0.0):
 
 	Rate=np.array(list(map(model,Weight,Load,Velocity,Slope,Eta,Gravity)))     # model can be anything
 	if noise!=0.0:
-		Rate *= (np.random.normal(loc=1.0, scale=noise, size=len(Rate)))
+		Rate = Rate*(np.random.normal(loc=1.0, scale=noise, size=len(Rate)))
 	
 	Fatigue=np.zeros(len(Rate))
 	for i, instant_rate in enumerate(Rate[:-1]):

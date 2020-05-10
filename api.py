@@ -32,6 +32,8 @@ def docs():
 	'/api/route/', methods=['POST']
 	<br>
 	'/api/predict/', methods=['POST']
+	<br>
+	'/api/predictions_ready', methods=['GET']
 	"""
 
 @app.route('/api/subjects', methods=['GET'])
@@ -186,12 +188,34 @@ def ready():
 			dict_return[ID] = False
 	return jsonify(dict_return)
 
+@app.route('/api/prepare/<ID>', methods=['GET'])
+def prepare(ID):
+	if ID not in os.listdir('traverse/temp/'):
+		return ("Error. Subject with ID: <b>"+ID+"</b> is not registered",400)
+
+	E=Explorer(ID = ID)
+	input_names = ['Weight', 'Load', 'Velocity', 'Slope']
+	if 'input_names' in request.args:
+		input_names = request.args['input_names'].split(',')
+	
+	
+	epochs=100
+	if 'epochs' in request.args:
+		epochs = request.args['epochs']
+	find_nn(E, epochs = epochs)
+
+	return ("Ok. Model for subject <b>"+ID+"</b> created",200)
+
+
+
 
 @app.route('/api/predict', methods=['POST'])
 #Predict Rate at an instance
 def predict():
 
 	json = request.json
+	if type(json)!=dict:
+		return ("Error. JSON of the traverse is required",400)
 	if "ID" not in json or "data" not in json:
 		return ("Error. Submission incomplete",400)
 	ID = json["ID"]
@@ -222,6 +246,7 @@ def predict():
 	E=Explorer(ID = ID)
 	
 	input_names = ['Weight', 'Load', 'Velocity', 'Slope']
+	# input_names = ['Load', 'Velocity', 'Slope']
 	if 'input_names' in request.args:
 		input_names = request.args['input_names'].split(',')
 	
