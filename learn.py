@@ -26,7 +26,9 @@ def find_nn(E, input_names=['Weight','Load','Velocity','Slope'], epochs=100, bat
 	model.add(Dense(layout[0], input_dim = (len(input_names)), activation='tanh' ))
 	
 	# Hidden - Layers
-	model.add(Dense(layout[1] ) )
+	for i in range(1,len(layout)-1):
+		model.add(Dense(layout[i] ) )
+		
 	# model.add(Dense(40, activation='tanh') )
 	# model.add(Dense(100, activation='tanh') )
 	# model.add(Dense(100, activation='tanh') )
@@ -39,7 +41,7 @@ def find_nn(E, input_names=['Weight','Load','Velocity','Slope'], epochs=100, bat
 	
 	# Output- Layer
 	# model.add(Dense(1, activation='sigmoid') ) #, activation = "relu"))
-	model.add(Dense(layout[2], activation='sigmoid') )
+	model.add(Dense(layout[-1], activation='sigmoid') )
 
 
 	model.summary()

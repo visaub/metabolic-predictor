@@ -147,12 +147,12 @@ def choose_and_plot(title):
 		Y=np.zeros(len(Vs))
 
 		G=0
-		for model_key in ['PL', 'GG', 'PL_santee', 'EE']:
+		for i,model_key in enumerate(['GG', 'PL', 'PL_santee', 'EE']):
 			model=MODELS[model_key]
 			for iv,V in enumerate(Vs):
 				Y[iv] = model(W=W, L=L, V=V, S=G, g=9.8)/(V*(W+L))
 			
-			plt.plot( Vs, Y, label=model_key)#+f', Optimal Speed=%.3f m/s'%Vs[list(Y).index(min(Y))] )
+			plt.plot( Vs, Y, label=['Givoni-Goldam (1971)', 'Pandolf (1976)','Pandolf and Santee (2001)', 'Energy Expenditure (2019)'][i])#+f', Optimal Speed=%.3f m/s'%Vs[list(Y).index(min(Y))] )
 			# plt.plot( Vs[list(Y).index(min(Y))], min(Y), 'r*', label = f'Optimal Speed = %.3f m/s'%Vs[list(Y).index(min(Y))] )
 
 		plt.title(r'Specfic Cost of Transport $[g=9.8m·s^{-2}]$', fontsize=15)
@@ -458,13 +458,14 @@ def choose_and_plot(title):
 		
 		# t = input('Please, choose traverse: ')
 		# E = Explorer(ID='user5', input_model='PL_santee', num_iters=30, ALL=False, traverse_name=t, weight=70)
-		E = Explorer(ID='user5', input_model='PL_santee', num_iters=30, ALL=False, traverse_name=['1','2','3','4','5'], weight=70)
+		E = Explorer(ID='user_final', input_model='PL_santee', num_iters=30, ALL=False, traverse_name=['1','2','3','4','5'], weight=70, vlim=2.5)
+		# For original paper: E = Explorer(ID='user5', input_model='PL_santee', num_iters=30, ALL=False, traverse_name=['1','2','3','4','5'], weight=70)
 
 		for i in range(len(available)):			
 			# plt.title('User1, traverse '+str(t), fontsize=15)
-			plt.title('User1')
+			plt.title('User2')
 			for t in range(20,26):
-				E = Explorer(ID='user5', input_model='PL_santee', num_iters=30, ALL=False, traverse_name=str(t), weight=70)
+				E = Explorer(ID='user_final', input_model='PL_santee', num_iters=30, ALL=False, traverse_name=str(t), weight=70)
 				plt.plot(E['TIME'], E[available[i]], label='traverse ' +str(t))
 			plt.xlabel('TIME [seconds]', fontsize=15)
 			plt.ylabel(available[i], fontsize=15)

@@ -18,17 +18,17 @@ class Environment():
 
 
 class Explorer():    # Most important Class
-	def __init__(self, ID=False, input_model='PL', num_iters=10, ALL=True, gravity=9.8, weight=None, load=None, eta=1.0, traverse_name=None, noise=0.02):
+	def __init__(self, ID=False, input_model='PL', num_iters=10, ALL=True, gravity=9.8, weight=None, load=None, eta=1.0, traverse_name=None, noise=0.02, vlim=5.0):
 		env=Environment(gravity,eta,weight,load)
 		if ID:
 			self.ID = ID
 			list_users_traverse = os.listdir('traverse/temp')
 			if ID not in list_users_traverse:
-				self.ID, env = generate_traverses(num_iters, ID=ID, input_model=input_model, env=env, noise=noise) 
+				self.ID, env = generate_traverses(num_iters, ID=ID, input_model=input_model, env=env, noise=noise, vlim=vlim) 
 				print("Created new subject: ID = "+ID)
 
 		if not ID:
-			self.ID, env = generate_traverses(num_iters, input_model=input_model, env=env)
+			self.ID, env = generate_traverses(num_iters, input_model=input_model, env=env, vlim=vlim)
 
 		self.list_dfs=self.read_temp(ALL=ALL, traverse_name=traverse_name)
 		self.list_Xs=['TIME','Weight','Load','Velocity','Slope']
@@ -135,7 +135,7 @@ class Explorer():    # Most important Class
 		self.list_Xs=list_Xs			
 				
 
-def generate_traverses(num_iters=100, input_model='PL', plot_it=False, ID=False, env=None, save=True, noise=0.0):
+def generate_traverses(num_iters=100, input_model='PL', plot_it=False, ID=False, env=None, save=True, noise=0.0, vlim=5.0):
 	#os.mkdir('traverse/test')
 	prefix=''
 	if not ID: #if there is no subject ID, a new one is created
@@ -184,8 +184,8 @@ def generate_traverses(num_iters=100, input_model='PL', plot_it=False, ID=False,
 			V=V+np.random.uniform(-0.5-(V-2.5)/20, 0.5-(V-2.5)/20)/4
 			if V<0.1:
 				V=0.1
-			if V>5:
-				V=5
+			if V>vlim:
+				V=vlim
 			velocity[k] = V
 
 			S=S+np.random.uniform(-S/60-2,-S/60+2)/4
